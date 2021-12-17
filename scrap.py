@@ -74,12 +74,12 @@ def _get_reviews_using_soup(response):
     reviews_list = []
     soup = BeautifulSoup(response.content, 'lxml')
     the_latest = soup.find(class_="review-list")
-    mydivs = soup.find_all("p", {"class": "text-body-2"})
-    if len(mydivs) < 1:
+    p_tags_list = soup.find_all("p", {"class": "text-body-2"})
+    if len(p_tags_list) < 1:
         return reviews_list
-    for i in range(0, len(mydivs) - 1):
+    for i in range(0, len(p_tags_list) - 1):
         if i % 2 == 0:  # showing every even p tag because p at odd tags contains information text
-            review_text = str(mydivs[i])
+            review_text = str(p_tags_list[i])
             review_text = _normalize_review(review_text)
             reviews_list.append(review_text)
 
