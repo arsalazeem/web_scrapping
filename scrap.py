@@ -28,10 +28,10 @@ def _get_reviews_using_soup(response):
     return reviews_list
 
 
-def get_reviews(response, class_name):
+def _get_data_using_soup(response, class_name):
     soup = BeautifulSoup(response.content, 'lxml')
-    ratings_text = soup.find(class_=class_name).text
-    return ratings_text
+    text_data = soup.find(class_=class_name).text
+    return text_data
 
 
 def fetch_profile_data(url):
@@ -41,9 +41,9 @@ def fetch_profile_data(url):
         "about_me": 'description',
     }
     response = _fetch_html_structure(url)
-    average_review = get_reviews(response, classes.get("average_review"))
-    total_reviews = get_reviews(response, classes.get("total_reviews"))
-    about = get_reviews(response, classes.get("about_me"))
+    average_review = _get_data_using_soup(response, classes.get("average_review"))
+    total_reviews = _get_data_using_soup(response, classes.get("total_reviews"))
+    about = _get_data_using_soup(response, classes.get("about_me"))
     reviews_list = _get_reviews_using_soup(response)
     total_reviews = total_reviews.replace("(", "")
     total_reviews = total_reviews.replace(")", "")
