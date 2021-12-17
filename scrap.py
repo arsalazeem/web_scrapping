@@ -3,7 +3,7 @@ import re
 from bs4 import BeautifulSoup
 import requests
 import json
-
+import lxml
 
 def _normalize_review(text):
     normal = text
@@ -104,12 +104,7 @@ def fetch_profile_data(url):
     scrapping_data = json.dumps(scrapping_data)  # conveting python dictonary into Json
     return scrapping_data
 
-    # for i in range(0,100):
-    #     try:
-    #         reviews_list = the_latest.findAll("p")[i].text
-    #         print(reviews_list)
-    #     except Exception as e:
-    #         pass
+
 
 
 def handler_name(event, context):
