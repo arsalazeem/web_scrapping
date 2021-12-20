@@ -3,7 +3,6 @@ import re
 from bs4 import BeautifulSoup
 import requests
 import json
-import lxml
 
 
 def _fetch_html_structure(url):
@@ -35,29 +34,32 @@ def _get_data_using_soup(response, class_name):
 
 
 def fetch_profile_data(url):
-    classes = {
-        "average_review": 'rating-score rating-num',
-        "total_reviews": 'ratings-count rating-count',
-        "about_me": 'description',
-    }
-    response = _fetch_html_structure(url)
-    average_review = _get_data_using_soup(response, classes.get("average_review"))
-    total_reviews = _get_data_using_soup(response, classes.get("total_reviews"))
-    about = _get_data_using_soup(response, classes.get("about_me"))
-    reviews_list = _get_reviews_using_soup(response)
-    total_reviews = total_reviews.replace("(", "")
-    total_reviews = total_reviews.replace(")", "")
-    total_reviews = total_reviews.replace(" reviews", "")
-    about = about[11:]
-    scrapped_data = {
-        "total_projects_completed": total_reviews,
-        "average_review": average_review,
-        "total_reviews_count": total_reviews,
-        "about_me": about,
-        "reviews_list": reviews_list
+    try:
+        classes = {
+            "average_review": 'rating-score rating-num',
+            "total_reviews": 'ratings-count rating-count',
+            "about_me": 'description',
+        }
+        response = _fetch_html_structure(url)
+        average_review = _get_data_using_soup(response, classes.get("average_review"))
+        total_reviews = _get_data_using_soup(response, classes.get("total_reviews"))
+        about = _get_data_using_soup(response, classes.get("about_me"))
+        reviews_list = _get_reviews_using_soup(response)
+        total_reviews = total_reviews.replace("(", "")
+        total_reviews = total_reviews.replace(")", "")
+        total_reviews = total_reviews.replace(" reviews", "")
+        about = about[11:]
+        scrapped_data = {
+            "total_projects_completed": total_reviews,
+            "average_review": average_review,
+            "total_reviews_count": total_reviews,
+            "about_me": about,
+            "reviews_list": reviews_list
 
-    }
-    return scrapped_data
+        }
+        return {"success": 1, "data": scrapped_data, "messege":"User data scrapped successfully"}
+    except Exception as e:
+        return {"success": 0, "data": {}, "messege": e}
 
 
 def handler_name(event, context):
