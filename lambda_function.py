@@ -1,3 +1,4 @@
+import json
 import pdb
 import re
 from bs4 import BeautifulSoup
@@ -13,7 +14,7 @@ def _fetch_html_structure(url):
 
 def _get_reviews_using_soup(response):
     reviews_list = []
-    soup = BeautifulSoup(response.content, 'lxml')
+    soup = BeautifulSoup(response.content, "html.parser")
     the_latest = soup.find(class_="review-list")
     p_tags_list = soup.find_all("p", {"class": "text-body-2"})
     if len(p_tags_list) < 1:
@@ -28,12 +29,15 @@ def _get_reviews_using_soup(response):
 
 
 def _get_data_using_soup(response, class_name):
-    soup = BeautifulSoup(response.content, 'lxml')
+    soup = BeautifulSoup(response.content, "html.parser")
     text_data = soup.find(class_=class_name).text
     return text_data
 
 
-def fetch_profile_data(url):
+
+
+def lambda_handler(event, context):
+    url = event["url"]
     try:
         classes = {
             "average_review": 'rating-score rating-num',
@@ -55,19 +59,10 @@ def fetch_profile_data(url):
             "total_reviews_count": total_reviews,
             "about_me": about,
             "reviews_list": reviews_list
-
         }
-        return {"success": 1, "data": scrapped_data, "messege":"User data scrapped successfully"}
-    except Exception as e:
-        return {"success": 0, "data": {}, "messege": e}
+        return {"success": 1, "data": scrapped_data, "message": "User data scrapped successfully"}
+    except Exception as error:
+        error_string = str(error)
+        return {"success": 0, "data": {}, "message": error_string}
 
 
-def handler_name(event, context):
-    url = event["url"]
-    response = fetch_profile_data(url)
-    return response
-
-
-if __name__ == '__main__':
-    result = fetch_profile_data("https://www.fiverr.com/rankterpriseuk")
-    print(result)
