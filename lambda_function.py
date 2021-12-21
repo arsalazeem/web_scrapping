@@ -37,7 +37,6 @@ def _fetch_html_structure(url):
 def _get_reviews_as_buyer(response):
     reviews_list = []
     soup = BeautifulSoup(response.content, "html.parser")
-    the_latest = soup.find(class_="reviews-package is-collapsed")
     p_tags_list = soup.find_all("p", {"class": "text-body-2"})
     if len(p_tags_list) < 1:
         return reviews_list
@@ -53,7 +52,6 @@ def _get_reviews_as_buyer(response):
 def _get_reviews_using_soup(response):
     reviews_list = []
     soup = BeautifulSoup(response.content, "html.parser")
-    the_latest = soup.find(class_="review-list")
     p_tags_list = soup.find_all("p", {"class": "text-body-2"})
     if len(p_tags_list) < 1:
         return reviews_list
@@ -74,6 +72,7 @@ def _get_data_using_soup(response, class_name):
     except Exception as e:
         return "Not found"
 
+
 def _get_langs(response):
     langs_list = []
     try:
@@ -84,9 +83,11 @@ def _get_langs(response):
             langs_list.append(unicodedata.normalize("NFKD", skills.text).replace("  - Native/Bilingual", ""))
         return langs_list
     except Exception as e:
-        empty_list=[]
+        empty_list = []
         return empty_list
-   # languages
+
+
+# languages
 
 def _get_skills(response):
     skills_list = []
@@ -110,7 +111,7 @@ def fetch_profile(url):
             "skills": "skills"
         }
         response = _fetch_html_structure(url)
-        langs_list=_get_langs(response)
+        langs_list = _get_langs(response)
         skills_list = _get_skills(response)
         average_review = _get_data_using_soup(response, classes.get("average_review"))
         total_reviews = _get_data_using_soup(response, classes.get("total_reviews"))
@@ -136,7 +137,7 @@ def fetch_profile(url):
             "about_me": about,
             "reviews_list": reviews_list,
             "skills": skills_list,
-            "languages":langs_list
+            "languages": langs_list
         }
 
         return _return_response(scrapped_data, message_global.get("success_scrap"), 1)
@@ -147,7 +148,7 @@ def fetch_profile(url):
 
 def validate_url(url):
     target = "https://www.fiverr.com/"
-    if target in url:
+    if target in url and target != url:
         return True
     else:
         return False
@@ -171,7 +172,7 @@ def lambda_handler(event, context):
             "about_me": 'description',
         }
         response = _fetch_html_structure(url)
-        langs_list=_get_langs(response)
+        langs_list = _get_langs(response)
         skills_list = _get_skills(response)
         average_review = _get_data_using_soup(response, classes.get("average_review"))
         total_reviews = _get_data_using_soup(response, classes.get("total_reviews"))
@@ -197,7 +198,7 @@ def lambda_handler(event, context):
             "about_me": about,
             "reviews_list": reviews_list,
             "skills": skills_list,
-            "languages":langs_list
+            "languages": langs_list
         }
 
         return _return_response(scrapped_data, message_global.get("success_scrap"), 1)
@@ -206,4 +207,5 @@ def lambda_handler(event, context):
         error_string = str(error)
         return _return_response({}, error_string, 0)
 
-print(fetch_profile("https://www.fiverr.com/rankterpriseuk"))
+
+#print(fetch_profile("https://www.fiverr.com/rankterpriseuk"))
