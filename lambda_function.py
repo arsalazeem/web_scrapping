@@ -9,7 +9,8 @@ import json
 import validators
 
 message_global = {
-    "success_scrap": "User data scrapped successfully"
+    "success_scrap": "User data scrapped successfully",
+    "url_validation_error": "Please provide a valid url starting with https://www.fiverr.com/"
 }
 
 
@@ -73,6 +74,8 @@ def _get_data_using_soup(response, class_name):
 
 
 def fetch_profile(url):
+    if not validate_url(url):
+        return _return_response({}, message_global.get("url_validation_error"), 0)
     try:
         classes = {
             "average_review": 'rating-score rating-num',
@@ -110,12 +113,22 @@ def fetch_profile(url):
     except Exception as error:
         error_string = str(error)
         return _return_response({}, error_string, 0)
+
+
+def validate_url(url):
+    target = "https://www.fiverr.com/"
+    if target in url:
+        return True
+    else:
+        return False
 
 
 def lambda_handler(event, context):
     url_body = json.loads(event['body'])
     get_url = url_body["url"]
     url = get_url
+    if not validate_url(url):
+        return _return_response({}, message_global.get("url_validation_error"), 0)
     try:
         classes = {
             "average_review": 'rating-score rating-num',
@@ -156,5 +169,3 @@ def lambda_handler(event, context):
         return _return_response({}, error_string, 0)
 
 
-# a = fetch_profile("https://www.fiverr.com/itsmuq")
-# print(a)
