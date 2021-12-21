@@ -8,11 +8,43 @@ import requests
 import json
 import validators
 
+message_global = {
+    "success_scrap": "User data scrapped successfully"
+}
+
+
+def _return_response(user_profile, msg, success):
+    response_object = {"statusCode": 200,
+                       "headers": {
+                           "Content-Type": "application/json"
+                       },
+                       "body": json.dumps({
+                           "data": {"success": success, "user_profile": user_profile, "message": msg}
+                       }),
+                       }
+    return response_object
+
 
 def _fetch_html_structure(url):
     header = {'User-Agent': 'Mozilla/5.0'}
     response = requests.get(url, headers=header)
     return response
+
+
+def _get_reviews_as_buyer(response):
+    reviews_list = []
+    soup = BeautifulSoup(response.content, "html.parser")
+    the_latest = soup.find(class_="reviews-package is-collapsed")
+    p_tags_list = soup.find_all("p", {"class": "text-body-2"})
+    if len(p_tags_list) < 1:
+        return reviews_list
+    for i in range(0, len(p_tags_list) - 1):
+        if i % 2 == 0:  # showing every even p tag because p at odd tags contains information text
+            review_text = str(p_tags_list[i].text)
+            # review_text = _normalize_review(review_text)
+            reviews_list.append(review_text)
+
+    return reviews_list
 
 
 def _get_reviews_using_soup(response):
@@ -74,10 +106,10 @@ def fetch_profile(url):
             "reviews_list": reviews_list
         }
 
-        return {"success": 1, "data": scrapped_data, "message": "User data scrapped successfully"}
+        return _return_response(scrapped_data, message_global.get("success_scrap"), 1)
     except Exception as error:
         error_string = str(error)
-        return {"success": 0, "data": {}, "message": error_string}
+        return _return_response({}, error_string, 0)
 
 
 def lambda_handler(event, context):
@@ -117,23 +149,12 @@ def lambda_handler(event, context):
             "reviews_list": reviews_list
         }
 
-        return {
-            "statusCode": 200,
-            "headers": {
-                "Content-Type": "application/json"
-            },
-            "body": json.dumps({
-                "data": {"success": 1, "user_profile": scrapped_data, "message": "User data scrapped successfully"}
-            })
-        }
+        return _return_response(scrapped_data, message_global.get("success_scrap"), 1)
+
     except Exception as error:
         error_string = str(error)
-        return {
-            "statusCode": 200,
-            "headers": {
-                "Content-Type": "application/json"
-            },
-            "body": json.dumps({
-                "data": {"success": 0, "user_profile": {}, "message": error_string}
-            })
-        }
+        return _return_response({}, error_string, 0)
+
+
+# a = fetch_profile("https://www.fiverr.com/itsmuq")
+# print(a)
