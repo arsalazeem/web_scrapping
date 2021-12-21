@@ -157,8 +157,7 @@ def validate_url(url):
 def lambda_handler(event, context):
     try:
         url_body = json.loads(event['body'])
-        get_url = url_body["url"]
-        url = get_url
+        url = url_body["url"]
     except Exception as e:
         return _return_response({}, message_global.get("key_error"), 0)
 
@@ -171,27 +170,30 @@ def lambda_handler(event, context):
             "exact_review": "total-rating header-total-rating",
             "about_me": 'description',
         }
-        response = _fetch_html_structure(url)
-        langs_list = _get_langs(response)
-        skills_list = _get_skills(response)
-        average_review = _get_data_using_soup(response, classes.get("average_review"))
-        total_reviews = _get_data_using_soup(response, classes.get("total_reviews"))
-        if "k+" in total_reviews:
+        response = _fetch_html_structure(url)  # get response as html if calling an html page directly
+        langs_list = _get_langs(
+            response)  # call langs list and it returns a list of languages,pass the basic response object
+        skills_list = _get_skills(response)  # return list of skills
+        average_review = _get_data_using_soup(response, classes.get("average_review"))  # returns average average rating
+        total_reviews = _get_data_using_soup(response, classes.get("total_reviews"))  # returns total number of views
+        if "k+" in total_reviews:  # if the reviews are like 1k+ look in div with below class
             print("Fetching exact reviews")
-            total_reviews = _get_data_using_soup(response, classes.get("exact_review"))
-        about = _get_data_using_soup(response, classes.get("about_me"))
+            total_reviews = _get_data_using_soup(response, classes.get(
+                "exact_review"))  # look for exact number of reviews and return number of reviews
+        about = _get_data_using_soup(response, classes.get("about_me"))  # returns about me for the user profile
         reviews_list = _get_reviews_using_soup(response)
-        total_reviews = total_reviews.replace("(", "")
-        total_reviews = total_reviews.replace(")", "")
-        total_reviews = total_reviews.replace(" reviews", "")
-        about = about[11:]
-        try:
+        total_reviews = total_reviews.replace("(", "")  # normalize text
+        total_reviews = total_reviews.replace(")", "")  # normalize text
+        total_reviews = total_reviews.replace(" reviews", "")  # normalize text
+        about = about[
+                11:]  # remove the word description from the start of description, description is a 11 letter long word
+        try:  # try to convert the string values i.e total number of reviews and average to int/float
             total_reviews = total_reviews.replace(',', "")
             total_reviews = float(total_reviews)
             average_review = float(average_review)
-        except Exception as error:
+        except Exception as error:  # if there is any exception keep data types to strings
             print(error)
-        scrapped_data = {
+        scrapped_data = {  # create the data object to be sent in response
             "total_projects_completed": total_reviews,
             "average_review": average_review,
             "total_reviews_count": total_reviews,
@@ -201,11 +203,11 @@ def lambda_handler(event, context):
             "languages": langs_list
         }
 
-        return _return_response(scrapped_data, message_global.get("success_scrap"), 1)
+        return _return_response(scrapped_data, message_global.get("success_scrap"),
+                                1)  # calling this method with return the response object with headers
 
     except Exception as error:
         error_string = str(error)
-        return _return_response({}, error_string, 0)
+        return _return_response({}, error_string, 0)  # if there is an exption return this object
 
-
-#print(fetch_profile("https://www.fiverr.com/rankterpriseuk"))
+# print(fetch_profile("https://www.fiverr.com/rankterpriseuk"))
