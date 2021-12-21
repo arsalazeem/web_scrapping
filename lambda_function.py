@@ -73,6 +73,17 @@ def _get_data_using_soup(response, class_name):
         return "Not found"
 
 
+def _get_skills(response):
+    skills_list = []
+    soup = BeautifulSoup(response.content, "html.parser")
+    the_latest = soup.find(class_="review-list")
+    p_tags_list = soup.find_all("div", {"class": "skills"})
+    skills_html_list = p_tags_list[0].find_all("li")
+    for skills in skills_html_list:
+        skills_list.append(skills.text)
+    return skills_list
+
+
 def fetch_profile(url):
     if not validate_url(url):
         return _return_response({}, message_global.get("url_validation_error"), 0)
@@ -82,8 +93,10 @@ def fetch_profile(url):
             "total_reviews": 'ratings-count rating-count',
             "exact_review": "total-rating header-total-rating",
             "about_me": 'description',
+            "skills": "skills"
         }
         response = _fetch_html_structure(url)
+        skills_list = _get_skills(response)
         average_review = _get_data_using_soup(response, classes.get("average_review"))
         total_reviews = _get_data_using_soup(response, classes.get("total_reviews"))
         if "k+" in total_reviews:
@@ -106,7 +119,8 @@ def fetch_profile(url):
             "average_review": average_review,
             "total_reviews_count": total_reviews,
             "about_me": about,
-            "reviews_list": reviews_list
+            "reviews_list": reviews_list,
+            "skills": skills_list
         }
 
         return _return_response(scrapped_data, message_global.get("success_scrap"), 1)
@@ -137,6 +151,7 @@ def lambda_handler(event, context):
             "about_me": 'description',
         }
         response = _fetch_html_structure(url)
+        skills_list = _get_skills(response)
         average_review = _get_data_using_soup(response, classes.get("average_review"))
         total_reviews = _get_data_using_soup(response, classes.get("total_reviews"))
         if "k+" in total_reviews:
@@ -159,7 +174,8 @@ def lambda_handler(event, context):
             "average_review": average_review,
             "total_reviews_count": total_reviews,
             "about_me": about,
-            "reviews_list": reviews_list
+            "reviews_list": reviews_list,
+            "skills": skills_list
         }
 
         return _return_response(scrapped_data, message_global.get("success_scrap"), 1)
@@ -169,3 +185,4 @@ def lambda_handler(event, context):
         return _return_response({}, error_string, 0)
 
 
+# print(fetch_profile("https://www.fiverr.com/rankterpriseuk"))
