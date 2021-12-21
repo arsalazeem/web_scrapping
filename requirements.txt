@@ -1,3 +1,11 @@
-requests~=2.26.0
+lxml~=4.7.1
 beautifulsoup4~=4.10.0
-lxml
+soupsieve~=2.3.1
+certifi~=2021.10.8
+urllib3~=1.26.7
+six~=1.16.0
+idna~=3.3
+setuptools~=57.0.0
+validators~=0.18.2
+decorator~=5.1.0
+requests~=2.26.0
